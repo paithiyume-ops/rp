@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="College Payment Details" />
+  <title>College Payment</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:linear-gradient(135deg,#071a3d,#0d47a1);display:flex;align-items:center;justify-content:center;padding:24px;color:#14213d}
+    .card{width:min(680px,100%);background:#fff;border-radius:22px;padding:30px;box-shadow:0 22px 60px rgba(0,0,0,.28)}
+    h1{margin:0 0 8px;text-align:center;color:#0b2d66;font-size:30px}
+    .subtitle{text-align:center;color:#667085;margin:0 0 24px}
+    .bank{background:#eef5ff;border:1px solid #cfe0ff;border-radius:16px;padding:18px;margin-bottom:24px}
+    .bank h2{margin:0 0 12px;font-size:18px;color:#0b2d66}
+    .bank-row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #dbe7f8}
+    .bank-row:last-child{border-bottom:0}
+    .bank-row span:last-child{font-weight:700;word-break:break-all}
+    form{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .full{grid-column:1/-1}
+    label{display:block;font-weight:700;font-size:14px;margin-bottom:7px}
+    input,select{width:100%;padding:13px 14px;border:1px solid #ccd5e1;border-radius:11px;font-size:15px;outline:none;background:#fff}
+    input:focus,select:focus{border-color:#1769e0;box-shadow:0 0 0 3px rgba(23,105,224,.12)}
+    button{grid-column:1/-1;border:0;border-radius:12px;padding:15px;background:#0b5ed7;color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+    button:disabled{opacity:.65;cursor:not-allowed}
+    #status{grid-column:1/-1;text-align:center;min-height:24px;font-weight:600}
+    .success{color:#087f5b}.error{color:#c92a2a}
+    .note{font-size:12px;color:#667085;text-align:center;margin-top:16px}
+    @media(max-width:600px){form{grid-template-columns:1fr}.full{grid-column:auto}button,#status{grid-column:auto}.card{padding:20px}}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>College Payment Details</h1>
+    <p class="subtitle">Enter your payment details carefully</p>
+
+    <section class="bank" aria-label="College bank details">
+      <h2>College Bank Details</h2>
+      <div class="bank-row"><span>Account Number</span><span>090301000070001</span></div>
+      <div class="bank-row"><span>IFSC</span><span>IOBA0000903</span></div>
+    </section>
+
+    <form id="paymentForm">
+      <div>
+        <label for="name">Name</label>
+        <input id="name" name="name" required maxlength="100" autocomplete="name" />
+      </div>
+
+      <div>
+        <label for="mobile">Mobile</label>
+        <input id="mobile" name="mobile" type="tel" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" required autocomplete="tel" />
+      </div>
+
+      <div>
+        <label for="registerNumber">Register Number</label>
+        <input id="registerNumber" name="registerNumber" required maxlength="50" />
+      </div>
+
+      <div>
+        <label for="department">Department</label>
+        <select id="department" name="department" required>
+          <option value="">Select Department</option>
+          <option>EEE</option><option>ECE</option><option>CSE</option><option>Mechanical</option><option>Civil</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="year">Year</label>
+        <select id="year" name="year" required>
+          <option value="">Select Year</option>
+          <option>1st Year</option><option>2nd Year</option><option>3rd Year</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="section">Section</label>
+        <input id="section" name="section" required maxlength="20" />
+      </div>
+
+      <div>
+        <label for="transactionNumber">Transaction Number</label>
+        <input id="transactionNumber" name="transactionNumber" required maxlength="100" />
+      </div>
+
+      <div>
+        <label for="amount">Amount</label>
+        <input id="amount" name="amount" type="number" min="1" step="0.01" required />
+      </div>
+
+      <div class="full">
+        <label for="academicYear">Academic Year</label>
+        <input id="academicYear" name="academicYear" value="2026-27" required maxlength="20" />
+      </div>
+
+      <button id="submitBtn" type="submit">Submit Payment Details</button>
+      <div id="status" aria-live="polite"></div>
+    </form>
+
+    <p class="note">Please verify your transaction number and amount before submitting.</p>
+  </main>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxeU7wlh7kUlEDvJBTeA9lTzuzelTJDSUcc4dIG9sfjXL5gUO1yLeAqirdgraGucrTPYQ/exec";
+
+    const form = document.getElementById("paymentForm");
+    const button = document.getElementById("submitBtn");
+    const status = document.getElementById("status");
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      status.className = "";
+      status.textContent = "";
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Submitting...";
+
+      try {
+        const formData = new FormData(form);
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: formData,
+          mode: "no-cors"
+        });
+
+        status.className = "success";
+        status.textContent = "Submitted successfully. Please check the college sheet if needed.";
+        form.reset();
+        document.getElementById("academicYear").value = "2026-27";
+      } catch (error) {
+        console.error(error);
+        status.className = "error";
+        status.textContent = "Submission failed. Please try again.";
+      } finally {
+        button.disabled = false;
+        button.textContent = "Submit Payment Details";
+      }
+    });
+  </script>
+</body>
+</html>
